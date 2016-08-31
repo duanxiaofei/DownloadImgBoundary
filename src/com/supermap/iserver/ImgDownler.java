@@ -13,17 +13,15 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * 下载google聚合地图 Created by duanxiaofei on 2016/3/16.
+ * 下载聚合地图
+ * 通过解析imageUrl值进行二进制流输出
+ * 1表示概览图，2表示高清图
+ * iserver返回的是png格式，进行转换成jpg，最后做二次绘制，删除png
+ * @author duanxiaofei
+ *
  */
-public class GoogleImg extends BaseImg {
+public class ImgDownler extends BaseImg {
 
-	/**
-	 * 从iserver服务器获取聚合地图数据 抽象处理，google地图、天地图返回的数据格式不一样，据实际情况进行覆盖处理。
-	 * 
-	 * @param fileName
-	 * @param result
-	 * @return
-	 */
 	@Override
 	public Task getImgFromServer(Task task, String result) {
 		if(result==null){
@@ -39,8 +37,7 @@ public class GoogleImg extends BaseImg {
 		}
 		int mapLevel = task.getMapLevel();
 		String code = task.getCode();
-		// 概览图，文件名为code_1;否则，高清图为code_2
-		String fileName =  System.getProperty("user.home") + File.separator + "webapps" + File.separator 
+		String fileName =  System.getProperty("catalina.home") + File.separator + "webapps" + File.separator 
 				+ "googleImg"+File.separator+super.getFileDir(code);
 		File dir=new File(fileName);
 		if(!dir.exists()){
@@ -80,12 +77,10 @@ public class GoogleImg extends BaseImg {
 				e.printStackTrace();
 			}
 		}
-		//png2jpg，并重绘图片
 		String pngFileName=task.getFileName();
 		if(super.png2jpg(task)){
 			super.drawMapContent(task);
 		}
-		//删除png，只保留jpg
 		super.deleteFile(pngFileName);
 		return task;
 	}

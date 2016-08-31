@@ -16,6 +16,7 @@ public class RestClient {
 			System.out.println("googleMapsCompatibleResolutions£º"+service.getGoogleMapsCompatibleResolutions());
 			System.out.println("widthExt£º"+service.getWidthExt());
 			System.out.println("heightExt£º"+service.getHeightExt());
+			System.out.println("tianditu£º"+service.isTianditu());
 			server.close();
 		} catch (Exception e) {
 			e.printStackTrace();

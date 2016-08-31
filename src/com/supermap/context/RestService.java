@@ -15,5 +15,6 @@ public interface RestService {
 	void setWidthExt(int ext);
 	int getHeightExt();
 	void setHeightExt(int ext);
-	
+	public boolean isTianditu();
+	public void setTianditu(boolean tianditu);
 }

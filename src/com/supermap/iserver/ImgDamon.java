@@ -37,7 +37,7 @@ public class ImgDamon implements ServletContextListener {
 				@Override
 				public void run() {
 					while (true) {
-						String taskPath = System.getProperty("user.home") + File.separator
+						String taskPath = System.getProperty("catalina.home") + File.separator
 								+ "webapps" + File.separator + "task";
 						File taskDir = new File(taskPath);
 						if(!taskDir.exists()){
@@ -81,7 +81,7 @@ public class ImgDamon implements ServletContextListener {
 									ok.info("release the lock!");
 									if (content != null && content.length() > 0) {
 										String[] a = content.split("\\|");
-										BaseImg img = new TiandituImg();
+										BaseImg img = new ImgDownler();
 										Task t = new Task();
 										t.setName(a[0]);
 										t.setCode(a[1]);

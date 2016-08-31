@@ -12,6 +12,12 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 import com.supermap.context.RestServer;
 import com.supermap.context.RestService;
 
+/**
+ * 从iserver获取图片资源 通过边界位置计算图片的范围
+ * 
+ * @author duanxiaofei
+ * 
+ */
 public class Resource {
 
 	public static String getResult(Task task) {
@@ -32,16 +38,15 @@ public class Resource {
 
 		int areaLevel = task.getAreaLeve();
 		String restUrl = "";
-		// 村居委会或普查小区级别
 		if (areaLevel == 6 || areaLevel == 7) {
 			restUrl = service.getVillageRestUrl();
 		} else if (areaLevel == 5) {
-			// 乡镇级别
 			restUrl = service.getTownRestUrl();
 		} else if (areaLevel == 4) {
-			// 区县级别
 			restUrl = service.getCountryRestUrl();
 		}
+		boolean tianditu = service.isTianditu();
+
 		String bounds = task.getBounds();
 		WebResource imgResource = client.resource(restUrl);
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
@@ -57,20 +62,36 @@ public class Resource {
 		for (int i = 0; i < a.length; i++) {
 			d[i] = Double.valueOf(a[i]);
 		}
-		int width = (int) (Math.ceil((right - left + widthExt)
-				/ d[mapLevel - 1] / 256) * 256);
-		int height = (int) (Math.ceil((top - bottom + heightExt)
-				/ d[mapLevel - 1] / 256) * 256);
-		while ((width <= 1024 || height <= 1024) && mapLevel <= 18) {
-			mapLevel = mapLevel + 1;
-			width = (int) (Math.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
-			height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1] / 256) * 256);
+
+		int width = 0, height = 0;
+		if (tianditu) {
+			width = (int) (Math.ceil(getDistanceByWGS84(left, top, right, top,
+					widthExt) / d[mapLevel - 1] / 256) * 256) + 1024;
+			height = (int) (Math.ceil(getDistanceByWGS84(left, top, left,
+					bottom, heightExt) / d[mapLevel - 1] / 256) * 256) + 512;
+		} else {
+			width = (int) (Math.ceil((right - left + widthExt)
+					/ d[mapLevel - 1] / 256) * 256);
+			height = (int) (Math.ceil((top - bottom + heightExt)
+					/ d[mapLevel - 1] / 256) * 256);
+			while ((width <= 1024 || height <= 1024) && mapLevel <= 18) {
+				mapLevel = mapLevel + 1;
+				width = (int) (Math
+						.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
+				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1]
+						/ 256) * 256);
+			}
+			while (width >= 8192 || height >= 8192) {
+				mapLevel = mapLevel - 1;
+				width = (int) (Math
+						.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
+				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1]
+						/ 256) * 256);
+			}
 		}
-		while (width >= 8192 || height >= 8192) {
-			mapLevel = mapLevel - 1;
-			width = (int) (Math.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
-			height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1] / 256) * 256);
-		}
+		System.out.println("width：" + width);
+		System.out.println("height：" + height);
+
 		double centerX = (left + right) / 2;
 		double centerY = (top + bottom) / 2;
 		String center = "{x:" + double2String(centerX) + ",y:"
@@ -94,5 +115,25 @@ public class Resource {
 
 	protected static String double2String(double d) {
 		return String.format("%.16f", d);
+	}
+
+	private static double getDistanceByWGS84(double x1, double y1, double x2,
+			double y2, int ext) {
+		double result = 0;
+		double equatorEarthRadius = 6378140.000000;
+		result = equatorEarthRadius
+				* Math.acos(1 - (Math.pow(
+						(Math.sin((90 - y1) * Math.PI / 180)
+								* Math.cos(x1 * Math.PI / 180) - Math
+								.sin((90 - y2) * Math.PI / 180)
+								* Math.cos(x2 * Math.PI / 180)), 2)
+						+ Math.pow(
+								(Math.sin((90 - y1) * Math.PI / 180)
+										* Math.sin(x1 * Math.PI / 180) - Math
+										.sin((90 - y2) * Math.PI / 180)
+										* Math.sin(x2 * Math.PI / 180)), 2) + Math
+						.pow((Math.cos((90 - y1) * Math.PI / 180) - Math
+								.cos((90 - y2) * Math.PI / 180)), 2)) / 2);
+		return result + ext;
 	}
 }

@@ -15,6 +15,7 @@ public class SimpleRestService implements Referenceable, RestService {
 	private String googleMapsCompatibleResolutions;
 	private int widthExt;
 	private int heightExt;
+	private boolean tianditu;
 	
 	@Override
 	public Reference getReference() throws NamingException {
@@ -26,6 +27,7 @@ public class SimpleRestService implements Referenceable, RestService {
 		  ref.add(new StringRefAddr("googleMapsCompatibleResolutions",this.googleMapsCompatibleResolutions));
 		  ref.add(new StringRefAddr("widthExt",String.valueOf(this.widthExt)));
 		  ref.add(new StringRefAddr("heightExt",String.valueOf(this.heightExt)));
+		  ref.add(new StringRefAddr("tianditu",String.valueOf(this.tianditu)));
 		  return ref;
 	}
 
@@ -111,6 +113,16 @@ public class SimpleRestService implements Referenceable, RestService {
 	@Override
 	public void setHeightExt(int ext) {
 		this.heightExt=ext;
+	}
+
+	@Override
+	public boolean isTianditu() {
+		return tianditu;
+	}
+
+	@Override
+	public void setTianditu(boolean tianditu) {
+		this.tianditu = tianditu;
 	}
 
 }

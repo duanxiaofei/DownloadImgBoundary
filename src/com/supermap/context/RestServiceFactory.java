@@ -21,6 +21,7 @@ public class RestServiceFactory implements ObjectFactory {
 			String resolutions=(String) ref.get("googleMapsCompatibleResolutions").getContent();
 			int widthExt=Integer.valueOf(ref.get("widthExt").getContent().toString());
 			int heightExt=Integer.valueOf(ref.get("widthExt").getContent().toString());
+			boolean tianditu=Boolean.parseBoolean(ref.get("tianditu").getContent().toString());
 			SimpleRestService service = new SimpleRestService();
 			service.setVillageRestUrl(villageRestUrl);
 			service.setTownRestUrl(townRestUrl);
@@ -29,6 +30,7 @@ public class RestServiceFactory implements ObjectFactory {
 			service.setGoogleMapsCompatibleResolutions(resolutions);
 			service.setWidthExt(widthExt);
 			service.setHeightExt(heightExt);
+			service.setTianditu(tianditu);
 			return service;
 		}
 		return null;

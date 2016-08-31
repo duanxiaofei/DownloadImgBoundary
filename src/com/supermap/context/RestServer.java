@@ -40,6 +40,7 @@ public class RestServer {
 			String googleMapsCompatibleResolutions=props.getProperty("googleMapsCompatibleResolutions");
 			int widthExt=Integer.valueOf(props.getProperty("widthExt"));
 			int heightExt=Integer.valueOf(props.getProperty("heightExt"));
+			boolean tianditu=Boolean.parseBoolean(props.getProperty("tianditu"));
 			RestService service=new SimpleRestService();
 			service.setVillageRestUrl(villageRestUrl);
 			service.setTownRestUrl(townRestUrl);
@@ -48,6 +49,7 @@ public class RestServer {
 			service.setGoogleMapsCompatibleResolutions(googleMapsCompatibleResolutions);
 			service.setWidthExt(widthExt);
 			service.setHeightExt(heightExt);
+			service.setTianditu(tianditu);
 			try {
 				this.ctx.rebind("RestService", service);
 			} catch (NamingException e) {
