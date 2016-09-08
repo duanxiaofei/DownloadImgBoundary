@@ -33,6 +33,7 @@ public class Resource {
 		int mapLevel = task.getMapLevel();
 		int widthExt = service.getWidthExt();
 		int heightExt = service.getHeightExt();
+		int overviewLevel=service.getOverviewLevel();
 		ClientConfig config = new DefaultClientConfig();
 		Client client = Client.create(config);
 
@@ -64,29 +65,29 @@ public class Resource {
 		}
 
 		int width = 0, height = 0;
+		int level=0;
 		if (tianditu) {
-			width = (int) (Math.ceil(getDistanceByWGS84(left, top, right, top,
-					widthExt) / d[mapLevel - 1] / 256) * 256) + 1024;
-			height = (int) (Math.ceil(getDistanceByWGS84(left, top, left,
-					bottom, heightExt) / d[mapLevel - 1] / 256) * 256) + 512;
+			if(mapLevel>overviewLevel){
+				level=mapLevel-1;
+				widthExt=2*widthExt;
+				heightExt=2*heightExt;
+			}else{
+				level=mapLevel;
+			}
+			width = (int)(Math.ceil(getDistanceByWGS84(left, top, right, top) / d[(level)] / 256.0D) * 256.0D) +widthExt;
+		    height = (int)(Math.ceil(getDistanceByWGS84(left, top, left, bottom) / d[(level)] / 256.0D) * 256.0D) +heightExt;
 		} else {
-			width = (int) (Math.ceil((right - left + widthExt)
-					/ d[mapLevel - 1] / 256) * 256);
-			height = (int) (Math.ceil((top - bottom + heightExt)
-					/ d[mapLevel - 1] / 256) * 256);
+			width = (int) (Math.ceil((right - left + widthExt) / d[mapLevel - 1] / 256) * 256);
+			height = (int) (Math.ceil((top - bottom + heightExt) / d[mapLevel - 1] / 256) * 256);
 			while ((width <= 1024 || height <= 1024) && mapLevel <= 18) {
 				mapLevel = mapLevel + 1;
-				width = (int) (Math
-						.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
-				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1]
-						/ 256) * 256);
+				width = (int) (Math.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
+				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1] / 256) * 256);
 			}
 			while (width >= 8192 || height >= 8192) {
 				mapLevel = mapLevel - 1;
-				width = (int) (Math
-						.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
-				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1]
-						/ 256) * 256);
+				width = (int) (Math.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
+				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1] / 256) * 256);
 			}
 		}
 		System.out.println("width£º" + width);
@@ -94,9 +95,8 @@ public class Resource {
 
 		double centerX = (left + right) / 2;
 		double centerY = (top + bottom) / 2;
-		String center = "{x:" + double2String(centerX) + ",y:"
-				+ double2String(centerY) + "}";
-		double scale = 0.0254 / (d[mapLevel - 1] * 96);
+		String center = "{x:" + double2String(centerX) + ",y:" + double2String(centerY) + "}";
+		double scale = 0.0254 / (d[level] * 96);
 		queryParams.add("width", String.valueOf(width));
 		queryParams.add("height", String.valueOf(height));
 		queryParams.add("center", center);
@@ -117,23 +117,21 @@ public class Resource {
 		return String.format("%.16f", d);
 	}
 
-	private static double getDistanceByWGS84(double x1, double y1, double x2,
-			double y2, int ext) {
-		double result = 0;
-		double equatorEarthRadius = 6378140.000000;
-		result = equatorEarthRadius
-				* Math.acos(1 - (Math.pow(
-						(Math.sin((90 - y1) * Math.PI / 180)
-								* Math.cos(x1 * Math.PI / 180) - Math
-								.sin((90 - y2) * Math.PI / 180)
-								* Math.cos(x2 * Math.PI / 180)), 2)
-						+ Math.pow(
-								(Math.sin((90 - y1) * Math.PI / 180)
-										* Math.sin(x1 * Math.PI / 180) - Math
-										.sin((90 - y2) * Math.PI / 180)
-										* Math.sin(x2 * Math.PI / 180)), 2) + Math
-						.pow((Math.cos((90 - y1) * Math.PI / 180) - Math
-								.cos((90 - y2) * Math.PI / 180)), 2)) / 2);
-		return result + ext;
+	private static double getDistanceByWGS84(double x1, double y1, double x2, double y2) {
+		double EARTH_RADIUS = 6378.137;  
+		double radLat1 = rad(x1);    
+        double radLat2 = rad(x2);    
+        double a = radLat1 - radLat2;    
+        double b = rad(y1) - rad(y2);    
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2)    
+                + Math.cos(radLat1) * Math.cos(radLat2)    
+                * Math.pow(Math.sin(b / 2), 2)));    
+        s = s * EARTH_RADIUS;    
+        s = Math.round(s * 10000d) / 10000d;    
+        s = s*1000;    
+        return s;    
 	}
+	private static double rad(double d) {    
+        return d * Math.PI / 180.0;    
+    }   
 }
