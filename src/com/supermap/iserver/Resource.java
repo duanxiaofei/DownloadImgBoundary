@@ -66,6 +66,7 @@ public class Resource {
 
 		int width = 0, height = 0;
 		int level=0;
+		double scale=0f;
 		if (tianditu) {
 			if(mapLevel>overviewLevel){
 				level=mapLevel-1;
@@ -76,6 +77,7 @@ public class Resource {
 			}
 			width = (int)(Math.ceil(getDistanceByWGS84(left, top, right, top) / d[(level)] / 256.0D) * 256.0D) +widthExt;
 		    height = (int)(Math.ceil(getDistanceByWGS84(left, top, left, bottom) / d[(level)] / 256.0D) * 256.0D) +heightExt;
+		    scale = 0.0254 / (d[level] * 96);
 		} else {
 			width = (int) (Math.ceil((right - left + widthExt) / d[mapLevel - 1] / 256) * 256);
 			height = (int) (Math.ceil((top - bottom + heightExt) / d[mapLevel - 1] / 256) * 256);
@@ -89,6 +91,7 @@ public class Resource {
 				width = (int) (Math.ceil((right - left) / d[mapLevel - 1] / 256) * 256);
 				height = (int) (Math.ceil((top - bottom) / d[mapLevel - 1] / 256) * 256);
 			}
+			scale = 0.0254 / (d[mapLevel - 1] * 96);
 		}
 		System.out.println("width£º" + width);
 		System.out.println("height£º" + height);
@@ -96,7 +99,6 @@ public class Resource {
 		double centerX = (left + right) / 2;
 		double centerY = (top + bottom) / 2;
 		String center = "{x:" + double2String(centerX) + ",y:" + double2String(centerY) + "}";
-		double scale = 0.0254 / (d[level] * 96);
 		queryParams.add("width", String.valueOf(width));
 		queryParams.add("height", String.valueOf(height));
 		queryParams.add("center", center);
